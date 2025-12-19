@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // engineType = "binary"
+  // runtime  = "vercel-edge"
+  //output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  engineer
+  viewer
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Tenant {
+  id           String        @id @default(uuid())
+  name         String
+  slug         String        @unique
+  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime      @default(now())
+  memberships  Membership[]
+  incidents    Incident[]
+  savedViews   SavedView[]
+  featureFlags FeatureFlag[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  emailVerified DateTime?
+  accounts      Account[]
+  sessions      Session[]
+
+  memberships       Membership[]
+  createdIncidents  Incident[]      @relation("CreatedIncidents")
+  assignedIncidents Incident[]      @relation("AssignedIncidents")
+  timelineEvents    TimelineEvent[]
+  savedViews        SavedView[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Membership {
+  userId   String
+  tenantId String
+  role     Role
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tenantId])
+  @@index([tenantId])
+}
+
+enum Severity {
+  SEV1
+  SEV2
+  SEV3
+  SEV4
+}
+
+enum Status {
+  OPEN
+  MITIGATED
+  RESOLVED
+}
+
+model Incident {
+  id          String   @id @default(cuid())
+  title       String
+  severity    Severity
+  status      Status   @default(OPEN)
+  service     String
+  environment String // dev | staging | prod
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("CreatedIncidents", fields: [createdById], references: [id])
+
+  assigneeId String?
+  assignee   User?   @relation("AssignedIncidents", fields: [assigneeId], references: [id])
+
+  events TimelineEvent[]
+  tags   String[]
+
+  @@index([tenantId, status, severity])
+}
+
+model TimelineEvent {
+  id        String   @id @default(cuid())
+  type      String // note | action | status_change
+  content   String
+  createdAt DateTime @default(now())
+
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tenantId String // Added forDAL enforcement consistency
+}
+
+model SavedView {
+  id      String @id @default(cuid())
+  name    String
+  filters Json // Stores status, severity, etc.
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model FeatureFlag {
+  id          String  @id @default(cuid())
+  key         String // e.g., "new-incident-flow"
+  description String?
+  enabled     Boolean @default(false)
+
+  // JSON structure: { type: 'group', op: 'AND', rules: [...] }
+  rules Json
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  environment String @default("production") // production, staging, dev
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, key, environment])
+}
