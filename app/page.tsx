@@ -11,7 +11,7 @@ console.log("Current Session:", JSON.stringify(session, null, 2));
   if (!session) {
     return (
       <div className="p-10 text-center">
-        <h1 className="text-3xl mb-4">SaaS Platform</h1>
+        <h1 className="text-3xl mb-4">Multi-Tenant Ops Platform</h1>
         <Link href="/login" className="text-blue-600 underline">Please Login</Link>
       </div>
     );
