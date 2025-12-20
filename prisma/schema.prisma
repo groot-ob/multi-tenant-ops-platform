@@ -134,6 +134,7 @@ model Incident {
 
   events TimelineEvent[]
   tags   String[]
+  attachments Attachment[]
 
   @@index([tenantId, status, severity])
 }
@@ -183,4 +184,22 @@ model FeatureFlag {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, key, environment])
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  filename   String
+  fileUrl    String   // URL to access the file
+  fileType   String   // e.g., "image/png"
+  fileSize   Int      // In bytes
+  
+  // Relations
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  tenantId   String
+  
+  createdAt  DateTime @default(now())
+
+  @@index([incidentId])
+  @@index([tenantId])
 }

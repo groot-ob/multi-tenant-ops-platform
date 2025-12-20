@@ -2,10 +2,12 @@ import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 
 const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://');
 const cookiePrefix = useSecureCookies ? "__Secure-" : "";
 const hostName = "localhost"; // switch to domain use "yourdomain.com"
+
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -17,20 +19,24 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
-       authorization: {
+        authorization: {
         params: {
           scope: "read:user user:email",
         },
-  },
-      
+      },
     }),
 
-    // 🔹 Google
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID!,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    //   // Google always returns email (verified)
-    // }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    }),
   ],
   callbacks: {
    async jwt({ token, user, trigger }) {
@@ -69,7 +75,4 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-function GoogleProvider(arg0: { clientId: string; clientSecret: string; }): import("next-auth/providers/index").Provider {
-  throw new Error("Function not implemented.");
-}
 

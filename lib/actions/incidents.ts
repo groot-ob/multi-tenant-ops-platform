@@ -3,6 +3,7 @@
 import { getTenantPrisma } from "@/lib/prisma";
 import { Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { redis } from "@/lib/redis";
 
 export async function createIncident(formData: any, tenantId: string, userId: string) {
   const db = getTenantPrisma(tenantId);
@@ -91,34 +92,54 @@ export async function bulkUpdateIncidents({
   userId
 }: {
   ids: string[];
-  status?: any;
+  status?: Status;
   assigneeId?: string;
   tenantId: string;
   userId: string;
 }) {
   const db = getTenantPrisma(tenantId);
 
-  await db.$transaction(async (tx) => {
-    // 1. Perform the bulk update
-    await tx.incident.updateMany({
-      where: { id: { in: ids }, tenantId }, // tenantId check is critical!
+  // Define the transition logic
+  const allowedSourceStatuses: Record<Status, Status[]> = {
+    [Status.MITIGATED]: [Status.OPEN],
+    [Status.RESOLVED]: [Status.OPEN, Status.MITIGATED],
+    [Status.OPEN]: [], 
+  };
+
+  // We wrap the transaction result in a variable to return it later
+  const result = await db.$transaction(async (tx) => {
+    const updateResult = await tx.incident.updateMany({
+      where: { 
+        id: { in: ids }, 
+        tenantId,
+        ...(status && { status: { in: allowedSourceStatuses[status] } })
+      },
       data: {
         ...(status && { status }),
         ...(assigneeId && { assigneeId }),
       }
     });
 
-    // 2. Create timeline events for each incident
-    const events = ids.map(id => ({
-      incidentId: id,
-      type: "note" as const,
-      content: `Bulk Action: ${status ? `Status set to ${status}` : ''} ${assigneeId ? 'Assignee updated' : ''}`,
-      userId,
-      tenantId
-    }));
+    if (updateResult.count > 0) {
+      const events = ids.map(id => ({
+        incidentId: id,
+        type: "note" as const,
+        content: `Bulk Action: ${status ? `Status set to ${status}` : ''} ${assigneeId ? 'Assignee updated' : ''}`,
+        userId,
+        tenantId
+      }));
+      await tx.timelineEvent.createMany({ data: events });
+    }
 
-    await tx.timelineEvent.createMany({ data: events });
+    return { count: updateResult.count }; // Return count from transaction
   });
 
-  revalidatePath(`/t/[tenantSlug]/dashboard`, "layout");
+  // Clear Cache
+  const keys = await redis.keys(`incidents:${tenantId}:*`);
+  if (keys.length > 0) await redis.del(...keys);
+
+  revalidatePath(`/t/[tenantSlug]`, "layout");
+
+  // IMPORTANT: Return the result to the client!
+  return { success: true, count: result.count };
 }
