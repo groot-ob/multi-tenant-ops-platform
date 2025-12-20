@@ -22,6 +22,7 @@ export default function IncidentTable({ incidents, tenantSlug, onSelectionChange
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggleAll = () => {
+    
     const newSelected = selected.length === incidents.length ? [] : incidents.map((i) => i.id);
     setSelected(newSelected);
     onSelectionChange(newSelected);
