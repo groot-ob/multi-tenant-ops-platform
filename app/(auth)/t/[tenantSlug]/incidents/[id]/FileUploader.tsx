@@ -28,7 +28,6 @@ export default function FileUploader({ incidentId, tenantId }: { incidentId: str
   formData.append("incidentId", incidentId);
 
   try {
-    // The code "pauses" here for 2+ seconds while the server runs the scan
     const res = await fetch("/api/upload", { method: "POST", body: formData });
     const result = await res.json();
 
