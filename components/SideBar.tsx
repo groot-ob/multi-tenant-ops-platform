@@ -32,7 +32,7 @@ export default function Sidebar({ user, currentTenant, tenantSlug }: SidebarProp
     // { name: 'Dashboard', href: `/t/${tenantSlug}/dashboard`, icon: LayoutDashboard },
     // { name: 'Incidents', href: `/t/${tenantSlug}/incidents`, icon: AlertCircle },
     // { name: 'Team Members', href: `/t/${tenantSlug}/team`, icon: Users },
-    { name: 'Settings', href: `/t/${tenantSlug}/settings`, icon: Settings },
+    { name: 'Settings', href: `/t/${tenantSlug}/settings/flags`, icon: Settings },
   ];
 
   return (

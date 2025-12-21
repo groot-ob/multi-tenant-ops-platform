@@ -27,7 +27,7 @@ export async function getCachedIncidents(tenantId: string, queryOptions: any) {
 
   try {
     // Store for 5 minutes
-    await redis.set(CACHE_KEY, JSON.stringify(incidents), "EX", 300);
+   await redis.set(CACHE_KEY, JSON.stringify(incidents), "EX", 30);
   } catch (e) {
     console.error("Redis save error:", e);
   }

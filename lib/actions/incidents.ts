@@ -13,6 +13,15 @@ export async function createIncident(formData: any, tenantId: string, userId: st
   const service = formData.get("service");
   const environment = formData.get("environment");
 
+  const tagsRaw = formData.get("tags") as string;
+  let tags: string[] = [];
+    try {
+      tags = tagsRaw ? JSON.parse(tagsRaw) : [];
+    } catch (e) {
+      console.error("Failed to parse tags:", e);
+      tags = [];
+    }
+
   const incident = await db.incident.create({
     data: {
       title,
@@ -22,8 +31,9 @@ export async function createIncident(formData: any, tenantId: string, userId: st
       status: "OPEN",
       tenantId,
       createdById: userId,
-  
-      tags: ["manual-report"], 
+      tags: {
+        set: tags
+      }, 
     },
   });
 
@@ -38,6 +48,17 @@ export async function createIncident(formData: any, tenantId: string, userId: st
     }
   });
 
+  //Purge redis cache
+  try {
+    const keys = await redis.keys(`incidents:${tenantId}:*`);
+    if (keys.length > 0) {
+      await redis.del(...keys);
+    }
+  } catch (e) {
+    console.error("Redis Cache Purge Failed:", e);
+  }
+
+  
   revalidatePath(`/t/[tenantSlug]/dashboard`, "layout");
   return incident;
 }
@@ -140,6 +161,5 @@ export async function bulkUpdateIncidents({
 
   revalidatePath(`/t/[tenantSlug]`, "layout");
 
-  // IMPORTANT: Return the result to the client!
   return { success: true, count: result.count };
 }

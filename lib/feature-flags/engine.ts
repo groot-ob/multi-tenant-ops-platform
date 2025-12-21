@@ -1,52 +1,47 @@
-// import crypto from "crypto";
+import { FeatureRule, FlagContext } from "./schema";
+import { getDeterministicScore } from "./hashing";
 
-// export type EvaluationRule = {
-//   type: "allowlist" | "percentage" | "logical";
-//   value?: string[]; // For allowlist: ["user_1", "user_2"]
-//   rollout?: number; // For percentage: 50
-//   op?: "AND" | "OR";
-//   rules?: EvaluationRule[];
-// };
+interface EvaluationResult {
+  enabled: boolean;
+  trace: string;
+}
 
-// export function evaluateFlag(
-//   userId: string, 
-//   flagKey: string, 
-//   rules: EvaluationRule
-// ): { enabled: boolean; trace: string } {
-  
-//   // 1. Percentage Rollout Logic
-//   if (rules.type === "percentage") {
-//     // Deterministic hash: userId + flagKey -> number between 0-99
-//     const hash = crypto.createHash('sha256').update(userId + flagKey).digest('hex');
-//     const hashInt = parseInt(hash.substring(0, 8), 16) % 100;
-//     const isEnabled = hashInt < (rules.rollout || 0);
-//     return { 
-//       enabled: isEnabled, 
-//       trace: `Hash ${hashInt} vs Rollout ${rules.rollout}%` 
-//     };
-//   }
+export function evaluateRule(
+  rule: FeatureRule,
+  context: FlagContext,
+  flagKey: string
+): EvaluationResult {
+  switch (rule.type) {
+    case "percent": {
+      const score = getDeterministicScore(context.userId, flagKey);
+      const enabled = score < rule.rollout;
+      return {
+        enabled,
+        trace: `Percent: User score ${score} is ${enabled ? "<" : ">="} target ${rule.rollout}`,
+      };
+    }
 
-//   // 2. Allowlist Logic
-//   if (rules.type === "allowlist") {
-//     const isAllowed = rules.value?.includes(userId) || false;
-//     return { 
-//       enabled: isAllowed, 
-//       trace: isAllowed ? "User in allowlist" : "User not in allowlist" 
-//     };
-//   }
+    case "allowlist": {
+      const enabled = rule.values.includes(context.userId);
+      return {
+        enabled,
+        trace: `Allowlist: User ${context.userId} is ${enabled ? "present" : "absent"}`,
+      };
+    }
 
-//   // 3. Logical Composition (AND/OR)
-//   if (rules.type === "logical") {
-//     const results = rules.rules?.map(r => evaluateFlag(userId, flagKey, r)) || [];
-//     const isEnabled = rules.op === "AND" 
-//       ? results.every(r => r.enabled) 
-//       : results.some(r => r.enabled);
-    
-//     return { 
-//       enabled: isEnabled, 
-//       trace: `Logical ${rules.op}: [${results.map(r => r.trace).join(", ")}]` 
-//     };
-//   }
+    case "logical": {
+      const results = rule.conditions.map((c:FeatureRule) => evaluateRule(c, context, flagKey));
+      const enabled = rule.operator === "AND" 
+        ? results.every((r:EvaluationResult) => r.enabled) 
+        : results.some((r:EvaluationResult) => r.enabled);
 
-//   return { enabled: false, trace: "Default: Disabled" };
-// }
+      return {
+        enabled,
+        trace: `${rule.operator}([${results.map((r:EvaluationResult)  => r.trace).join(", ")}]) -> ${enabled}`,
+      };
+    }
+
+    default:
+      return { enabled: false, trace: "Unknown rule type" };
+  }
+}

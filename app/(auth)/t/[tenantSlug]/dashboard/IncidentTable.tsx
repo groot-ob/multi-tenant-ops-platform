@@ -9,6 +9,8 @@ interface Incident {
   severity: string;
   status: string;
   service: string;
+  createdAt: Date | string; 
+  updatedAt: Date | string; 
   assignee?: { name: string | null } | null;
 }
 
@@ -153,7 +155,6 @@ export default function IncidentTable({ incidents, tenantSlug, onSelectionChange
   );
 }
 
-// ... styles remain the same
 function getSeverityStyles(severity: string) {
     switch (severity) {
       case 'SEV1': return 'bg-red-100 text-red-700 border-red-200 ring-4 ring-red-50';

@@ -1,6 +1,5 @@
-// app/t/[tenantSlug]/incidents/[id]/page.tsx
 import { getTenantPrisma, prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import StatusButtons from "./StatusButtons"; 
@@ -50,10 +49,26 @@ export default async function IncidentDetailsPage({
               {incident.severity}
             </span>
           </div>
+
+
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span className="flex items-center gap-1.5"><ShieldAlert className="w-4 h-4" /> {incident.service}</span>
             <span className="flex items-center gap-1.5"><User className="w-4 h-4" /> Created by {incident.createdBy?.name}</span>
           </div>
+
+          {incident.tags && incident.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {incident.tags.map((tag) => (
+              <div 
+                key={tag} 
+                className="flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-600 shadow-sm"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                {tag}
+              </div>
+            ))}
+          </div>
+        )}
         </div>
 
         <StatusButtons 

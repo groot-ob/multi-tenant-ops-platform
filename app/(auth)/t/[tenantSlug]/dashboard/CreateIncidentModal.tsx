@@ -3,18 +3,36 @@
 import { useState } from "react";
 import { createIncident } from "@/lib/actions/incidents";
 import { useRouter } from "next/navigation";
-import { X, Plus, AlertTriangle, Globe, Terminal, Loader2 } from "lucide-react";
+import { X, Plus, AlertTriangle, Globe, Terminal, Loader2, TagIcon } from "lucide-react";
 
 export default function CreateIncidentModal({ tenantId, userId }: { tenantId: string, userId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const router = useRouter();
+
+  const handleAddTag = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
+    formData.append("tags", JSON.stringify(tags));
     try {
       await createIncident(formData, tenantId, userId);
       setIsOpen(false);
+      setTags([])
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -105,6 +123,30 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
               className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" 
               placeholder="e.g. core-api, auth-v2" 
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+              <TagIcon className="w-3 h-3" />
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-2 p-2 bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+              {tags.map(tag => (
+                <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-md border border-blue-100">
+                  {tag}
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-blue-900">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <input 
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+                placeholder={tags.length === 0 ? "Press Enter to add tags..." : ""}
+                className="flex-1 outline-none text-sm min-w-[120px] py-1 px-1"
+              />
+            </div>
           </div>
 
           {/* Footer Actions */}

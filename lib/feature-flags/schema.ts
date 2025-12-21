@@ -1,29 +1,36 @@
-// import { z } from "zod";
+import { z } from "zod";
 
-// // 1. Define the individual rule types
-// const PercentageRuleSchema = z.object({
-//   type: z.literal("percentage"),
-//   rollout: z.number().min(0).max(100), // Requirement: Percent rollout [cite: 56]
-// });
+/**
+ * Rule Schema
+ * Defines the logic for Percent Rollout, Allowlists, and Nesting (AND/OR)
+ */
+export const FeatureRuleSchema: z.ZodType<any> = z.lazy(() =>
+  z.discriminatedUnion("type", [
+    z.object({
+      type: z.literal("percent"),
+      rollout: z.number().min(0).max(100),
+    }),
+    z.object({
+      type: z.literal("allowlist"),
+      values: z.array(z.string()), 
+    }),
+    z.object({
+      type: z.literal("logical"),
+      operator: z.enum(["AND", "OR"]),
+      conditions: z.array(FeatureRuleSchema),
+    }),
+  ])
+);
 
-// const AllowlistRuleSchema = z.object({
-//   type: z.literal("allowlist"),
-//   value: z.array(z.string()), // Requirement: Allowlist [cite: 58]
-// });
+/**
+ * Context Schema
+ * The input data required to evaluate a flag
+ */
+export const FlagContextSchema = z.object({
+  userId: z.string(),
+  environment: z.enum(["production", "staging", "development"]),
+  service: z.string(),
+});
 
-// // 2. Define the recursive Logical Rule
-// // Use z.lazy because logical rules can contain other logical rules
-// const BaseRuleSchema = z.discriminatedUnion("type", [
-//   PercentageRuleSchema,
-//   AllowlistRuleSchema,
-//   z.object({
-//     type: z.literal("logical"),
-//     op: z.enum(["AND", "OR"]), // Requirement: Logical composition (AND/OR) 
-//     rules: z.array(z.lazy(() => FeatureFlagRuleSchema)),
-//   }),
-// ]);
-
-// export const FeatureFlagRuleSchema = BaseRuleSchema;
-
-// // Type for use in your TypeScript code
-// export type FeatureFlagRule = z.infer<typeof FeatureFlagRuleSchema>;
+export type FeatureRule = z.infer<typeof FeatureRuleSchema>;
+export type FlagContext = z.infer<typeof FlagContextSchema>;

@@ -4,10 +4,12 @@ import IncidentTable from "./IncidentTable";
 import CreateIncidentModal from "./CreateIncidentModal";
 import Link from "next/link";
 import { Search, Filter, XCircle, ChevronRight, ChevronLeft, AlertCircle } from "lucide-react";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth";
 import { getServerSession } from "next-auth";
 import IncidentListClient from "./IncidentListClient";
 import { getCachedIncidents } from "@/lib/services/incident-service";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import { Banner } from "@/components/flags/Banner";
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +30,17 @@ export default async function IncidentListPage({
   const { tenantSlug } = await params;
   const filters = await searchParams;
   const session = await getServerSession(authOptions);
+
+  // Get the current user's ID and Tenant ID from the session
+  const userId = session?.user?.id ?? "";
+  const membership = session?.user?.memberships?.find(m => m.slug === tenantSlug);
+  const tenantId = membership?.tenantId ?? "";
+  const flagKey = "feature-alpha-1";
+  const { enabled, trace } = await isFeatureEnabled(
+   flagKey, 
+    { userId, environment: "production", service: "dashboard" }, 
+    tenantId
+  );
 
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
   if (!tenant || !session) notFound();
@@ -79,7 +92,9 @@ export default async function IncidentListPage({
   };
 
   return (
+  
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8">
+       <Banner enabled={enabled} trace={trace} flagKey={flagKey} />
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header Section */}
@@ -170,5 +185,6 @@ export default async function IncidentListPage({
         </div>
       </div>
     </div>
+  
   );
 }
