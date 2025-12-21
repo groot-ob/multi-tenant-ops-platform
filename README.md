@@ -51,15 +51,15 @@ To satisfy Requirement 5 (Performance), we implemented a **Cache-Aside** pattern
 * **The Strategy**: We don't just cache the whole table; we cache specific query results. We generate a unique cache key by hashing the tenant ID combined with search filters, severity levels, and pagination cursors.
 * **Invalidation**: We utilize **Atomic Purging**. Whenever an incident is created or updated, the system identifies all cache keys associated with that specific tenant and purges them instantly, ensuring users never see stale data while maintaining sub-10ms response times for reads.
 
+##  Advanced Feature Flags
+A feature flag acts like a digital light switch that lets us turn specific parts of an app on or off for different people without changing the code. Instead of launching a feature to everyone at once, we can safely test it with a small group, invite specific users to a "beta" list, or slowly roll it out to a percentage of people to make sure everything works perfectly.
+
 
 
 ## 🚧 Features Currently in Development
 
 I have prioritized the core foundation (Multi-tenancy, Database, and Caching). The following sections are in progress as they require more complex setup:
 
-### 1. Advanced Feature Flags
-* **Status**: The database is ready. The logic to decide who sees which feature is being built.
-* **Why it's in progress**: To capture all the requirements well and make sure that  user always sees the same feature version (like a 50% rollout) without the system having to "remember" every choice."
 
 ### 2. Realtime Updates & Background Jobs
 * **Status**: Infrastructure is ready. The "Live" connection is being built.
