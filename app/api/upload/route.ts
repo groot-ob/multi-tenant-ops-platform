@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { getTenantPrisma } from '@/lib/prisma';
@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Prepare Storage Path
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
@@ -22,11 +21,23 @@ export async function POST(request: NextRequest) {
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
     const fullPath = path.join(uploadDir, fileName);
 
-    // 2. Ensure directory exists and write file
     await mkdir(uploadDir, { recursive: true });
     await writeFile(fullPath, buffer);
 
-    // 3. Save Metadata to Database
+    // Simulate antivirus scan 
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const isMalicious = Math.random() < 0.05;
+    if (isMalicious) {
+      // Delete the file from the public folder if it's "infected"
+      await unlink(fullPath);
+      console.warn(`[AV SCAN] Threat detected in ${file.name}. File deleted.`);
+      
+      return NextResponse.json({ 
+        error: "Security Check Failed", 
+        details: "Our antivirus scanner detected a potential threat in this file." 
+      }, { status: 403 });
+    }
+
     const db = getTenantPrisma(tenantId);
     await db.attachment.create({
       data: {
