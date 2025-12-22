@@ -74,7 +74,7 @@ I have prioritized the core foundation (Multi-tenancy, Database, and Caching). T
 
 
 ### 2. Automated Testing
-* **Status**: Manual testing is finished. Automated "Robot" tests are being written.
+* **Status**: Manual testing is finished. Automated tests are being written.
 * **Why it's in progress**: We are writing scripts that act like users to make sure that a user from "Company A" can never, under any circumstances, see data from "Company B."
 * **Needs**: `Jest` and `Playwright` for testing.
 
