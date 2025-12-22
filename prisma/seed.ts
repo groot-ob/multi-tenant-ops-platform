@@ -91,7 +91,7 @@ for (let i = 1; i <= 45; i++) {
     create: {
       key: flagKey,
       enabled: Math.random() > 0.5,
-      rules: { plan: 'enterprise' },
+      rules: { type: 'enterprise' },
       tenantId: acme.id,
       environment: 'production',
     },
