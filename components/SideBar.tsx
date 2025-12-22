@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, AlertCircle, Settings, Users, 
-  LogOut, Zap, ChevronRight 
+  LogOut, Zap, ChevronRight, 
+  ScrollText
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -29,10 +30,9 @@ export default function Sidebar({ user, currentTenant, tenantSlug }: SidebarProp
   if (!user) return <aside className="w-64 border-r bg-white fixed inset-y-0" />;
 
   const navItems = [
-    // { name: 'Dashboard', href: `/t/${tenantSlug}/dashboard`, icon: LayoutDashboard },
-    // { name: 'Incidents', href: `/t/${tenantSlug}/incidents`, icon: AlertCircle },
-    // { name: 'Team Members', href: `/t/${tenantSlug}/team`, icon: Users },
+
     { name: 'Settings', href: `/t/${tenantSlug}/settings/flags`, icon: Settings },
+    { name: "Logs", href: `/t/${tenantSlug}/settings/logs`, icon: ScrollText }
   ];
 
   return (

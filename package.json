@@ -12,6 +12,7 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^6.19.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "ioredis": "^5.8.2",
     "lucide-react": "^0.562.0",
@@ -27,6 +28,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
