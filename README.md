@@ -55,7 +55,11 @@ To satisfy Requirement 5 (Performance), we implemented a **Cache-Aside** pattern
 A feature flag acts like a digital light switch that lets us turn specific parts of an app on or off for different people without changing the code. Instead of launching a feature to everyone at once, we can safely test it with a small group, invite specific users to a "beta" list, or slowly roll it out to a percentage of people to make sure everything works perfectly.
 
 
+## Activity Audit Logs
+Save all incident status activitys to a database table `AuditLog`
+**TODO**: Implement a UI component to show history of all the activity logs. 
 
+NB/ Some open source tools like Grafana can later be integrated to keep track of all activity in the system using logs
 ## 🚧 Features Currently in Development
 
 I have prioritized the core foundation (Multi-tenancy, Database, and Caching). The following sections are in progress as they require more complex setup:
