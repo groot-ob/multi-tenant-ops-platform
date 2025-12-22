@@ -1,9 +1,15 @@
 "use server";
 
 import { getTenantPrisma } from "@/lib/prisma";
-import { Status } from "@prisma/client";
+import { PrismaClient, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redis } from "@/lib/redis";
+
+const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
+  [Status.OPEN]: [Status.MITIGATED, Status.RESOLVED],
+  [Status.MITIGATED]: [Status.RESOLVED],
+  [Status.RESOLVED]: [], 
+};
 
 export async function createIncident(formData: any, tenantId: string, userId: string) {
   const db = getTenantPrisma(tenantId);
@@ -72,12 +78,12 @@ export async function updateIncidentStatus(
   const db = getTenantPrisma(tenantId);
 
   const result = await db.$transaction(async (tx) => {
-    const current = await tx.incident.findUnique({
-      where: { id: incidentId },
-      select: { status: true }
+    const current = await tx.incident.findFirst({
+      where: { id: incidentId, tenantId: tenantId }
     });
 
     if (!current) throw new Error("Incident not found");
+
     if (current.status === Status.RESOLVED && newStatus === Status.OPEN) {
       throw new Error("Logic Violation: Resolved incidents cannot be re-opened.");
     }
@@ -94,6 +100,19 @@ export async function updateIncidentStatus(
         incidentId,
         userId,
         tenantId 
+      }
+    });
+ 
+
+    await tx.auditLog.create({
+      data: {
+        actorId: userId,
+        tenantId,
+        action: "UPDATE_STATUS",
+        entity: "Incident",
+        entityId: incidentId,
+        before: { status: current.status },
+        after: { status: newStatus },
       }
     });
 

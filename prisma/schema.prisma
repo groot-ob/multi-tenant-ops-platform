@@ -137,6 +137,7 @@ model Incident {
   attachments Attachment[]
 
   @@index([tenantId, status, severity])
+  @@unique([id, tenantId])
 }
 
 model TimelineEvent {
@@ -151,7 +152,7 @@ model TimelineEvent {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  tenantId String // Added forDAL enforcement consistency
+  tenantId String 
 }
 
 model SavedView {
@@ -202,4 +203,28 @@ model Attachment {
 
   @@index([incidentId])
   @@index([tenantId])
+}
+
+// Track every change in the system (Security/Reliability)
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String   // The user who did it 
+  tenantId  String   // Scoped per tenant 
+  action    String   // e.g., "UPDATE_INCIDENT_STATUS"
+  entity    String   // e.g., "Incident"
+  entityId  String
+  before    Json?    // State before change 
+  after     Json?    // State after change 
+  timestamp DateTime @default(now()) 
+}
+
+// Track specific incident timeline events (Incident Management)
+model IncidentEvent {
+  id          String   @id @default(cuid())
+  incidentId  String
+  type        String   // "note" | "action" | "status_change" [cite: 44]
+  content     String
+  metadata    Json?    // For status_change, store { from: "open", to: "mitigated" }
+  createdById String
+  createdAt   DateTime @default(now())
 }
