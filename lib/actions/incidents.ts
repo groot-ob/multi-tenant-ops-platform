@@ -5,6 +5,8 @@ import { PrismaClient, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redis } from "@/lib/redis";
 import { simulateNotification } from "./notification";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/auth";
 
 const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
   [Status.OPEN]: [Status.MITIGATED, Status.RESOLVED],
@@ -76,6 +78,8 @@ export async function updateIncidentStatus(
   tenantId: string,
   userId: string
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
   const db = getTenantPrisma(tenantId);
 
   const result = await db.$transaction(async (tx) => {
@@ -145,6 +149,8 @@ export async function bulkUpdateIncidents({
   userId: string;
 }) {
   const db = getTenantPrisma(tenantId);
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
 
   // Define the transition logic
   const allowedSourceStatuses: Record<Status, Status[]> = {

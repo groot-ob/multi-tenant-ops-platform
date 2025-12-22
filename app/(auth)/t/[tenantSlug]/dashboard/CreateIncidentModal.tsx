@@ -44,7 +44,7 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
   if (!isOpen) return (
     <button 
       onClick={() => setIsOpen(true)}
-      className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition-all shadow-sm active:scale-95"
+      className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-black transition-all shadow-sm active:scale-95"
     >
       <Plus className="w-4 h-4" />
       New Incident
@@ -53,59 +53,65 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Darker Overlay for better focus on modal */}
       <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] transition-opacity" 
         onClick={() => !isPending && setIsOpen(false)} 
       />
 
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-300 overflow-hidden animate-in fade-in zoom-in duration-200">
         
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        {/* Header - More Contrast */}
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Create Incident</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Initialize a new incident record for your team.</p>
+            <h2 className="text-xl font-extrabold text-slate-950">Create Incident</h2>
+            <p className="text-sm text-slate-600 mt-0.5 font-medium">Initialize a new incident record for your team.</p>
           </div>
           <button 
             onClick={() => setIsOpen(false)}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-200 rounded-full transition-colors"
             disabled={isPending}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form action={handleSubmit} className="p-6 space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <Terminal className="w-3 h-3" />
+        <form action={handleSubmit} className="p-6 space-y-6">
+          {/* Title */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+              <Terminal className="w-3.5 h-3.5" />
                Title
             </label>
             <input 
               name="title" 
               required 
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400" 
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-medium text-slate-950 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all placeholder:text-slate-500 shadow-sm" 
               placeholder="e.g. Major degradation in Checkout API" 
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <AlertTriangle className="w-3 h-3" />
+            {/* Severity */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                <AlertTriangle className="w-3.5 h-3.5" />
                 Severity
               </label>
-              <select name="severity" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+              <select name="severity" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-medium text-slate-950 appearance-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all shadow-sm">
                 <option value="SEV1">SEV1 — Critical</option>
                 <option value="SEV2">SEV2 — Major</option>
                 <option value="SEV3">SEV3 — Minor</option>
+                <option value="SEV3">SEV4 — Low</option>
               </select>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <Globe className="w-3 h-3" />
+            {/* Environment */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5" />
                 Environment
               </label>
-              <select name="environment" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm appearance-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+              <select name="environment" className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-medium text-slate-950 appearance-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all shadow-sm">
                 <option value="prod">Production</option>
                 <option value="staging">Staging</option>
                 <option value="dev">Development</option>
@@ -113,28 +119,30 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+          {/* Service Name */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
               Service Name
             </label>
             <input 
               name="service" 
               required 
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" 
+              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-medium text-slate-950 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all shadow-sm" 
               placeholder="e.g. core-api, auth-v2" 
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <TagIcon className="w-3 h-3" />
+          {/* Tags */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+              <TagIcon className="w-3.5 h-3.5" />
               Tags
             </label>
-            <div className="flex flex-wrap gap-2 p-2 bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+            <div className="flex flex-wrap gap-2 p-2 bg-white border border-slate-300 rounded-xl focus-within:ring-2 focus-within:ring-blue-600/20 focus-within:border-blue-600 transition-all shadow-sm">
               {tags.map(tag => (
-                <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-md border border-blue-100">
+                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md border border-blue-200">
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-blue-900">
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-blue-900 transition-colors">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -143,18 +151,18 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
-                placeholder={tags.length === 0 ? "Press Enter to add tags..." : ""}
-                className="flex-1 outline-none text-sm min-w-[120px] py-1 px-1"
+                placeholder={tags.length === 0 ? "Add tags (press enter)..." : ""}
+                className="flex-1 outline-none text-sm font-medium text-slate-950 min-w-[120px] py-1 px-1 placeholder:text-slate-500"
               />
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4">
+          {/* Footer Actions - Stronger Button Contrast */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
             <button 
               type="button" 
               onClick={() => setIsOpen(false)} 
-              className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              className="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-slate-950 transition-colors"
               disabled={isPending}
             >
               Cancel
@@ -162,7 +170,7 @@ export default function CreateIncidentModal({ tenantId, userId }: { tenantId: st
             <button 
               type="submit" 
               disabled={isPending}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-7 py-3 rounded-xl text-sm font-extrabold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending ? (
                 <>
