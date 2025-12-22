@@ -70,7 +70,6 @@ I have prioritized the core foundation (Multi-tenancy, Database, and Caching). T
 * **Why it's in progress**: 
     * **Realtime**: Setting up a system so that when one person updates an incident, everyone else sees it change instantly without refreshing.
     * **Jobs**: We are building a "waiting room" (Job Queue) for tasks like virus scanning files. This ensures if the app crashes, the scan isn't lost.
-* **Needs**: `BullMQ` for managing the list of jobs.
 
 
 
@@ -78,5 +77,24 @@ I have prioritized the core foundation (Multi-tenancy, Database, and Caching). T
 * **Status**: Manual testing is finished. Automated "Robot" tests are being written.
 * **Why it's in progress**: We are writing scripts that act like users to make sure that a user from "Company A" can never, under any circumstances, see data from "Company B."
 * **Needs**: `Jest` and `Playwright` for testing.
+
+### Screenshots
+
+## Login
+
+![Notification Icon Badge Update](./public/screenshots/login.png)
+## select organization
+![Notification Icon Badge Update](./public/screenshots/select_organization.png)
+## dashboard
+![Notification Icon Badge Update](./public/screenshots/dashboard.png)
+## incedent details 
+![Notification Icon Badge Update](./public/screenshots/details_page.png)
+
+## feature flags
+![Notification Icon Badge Update](./public/screenshots/flags.png)
+
+
+## Audit logs 
+![Notification Icon Badge Update](./public/screenshots/logs.png)
 
 ---
