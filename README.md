@@ -20,7 +20,7 @@ The entire stack is containerized. You do not need to install PostgreSQL or Redi
 
 3.  **Launch the Platform:**
     ```bash
-    docker-compose up --build
+    docker-compose up -d
     ```
     **This command automatically:**
     * Installs all dependencies (including `ioredis`).
@@ -55,13 +55,17 @@ To satisfy Requirement 5 (Performance), we implemented a **Cache-Aside** pattern
 A feature flag acts like a digital light switch that lets us turn specific parts of an app on or off for different people without changing the code. Instead of launching a feature to everyone at once, we can safely test it with a small group, invite specific users to a "beta" list, or slowly roll it out to a percentage of people to make sure everything works perfectly.
 
 
+## Activity Audit Logs
+Save all incident status activitys to a database table `AuditLog`
+**TODO**: Implement a UI component to show history of all the activity logs. 
 
+NB/ Some open source tools like Grafana can later be integrated to keep track of all activity in the system using logs
 ## 🚧 Features Currently in Development
 
 I have prioritized the core foundation (Multi-tenancy, Database, and Caching). The following sections are in progress as they require more complex setup:
 
 
-### 2. Realtime Updates & Background Jobs
+### 1. Realtime Updates & Background Jobs
 * **Status**: Infrastructure is ready. The "Live" connection is being built.
 * **Why it's in progress**: 
     * **Realtime**: Setting up a system so that when one person updates an incident, everyone else sees it change instantly without refreshing.
@@ -70,11 +74,7 @@ I have prioritized the core foundation (Multi-tenancy, Database, and Caching). T
 
 
 
-### 3. Security & Activity Logs (Audit Logs)
-* **Status**: Basic security is done. Detailed history logs are being built.
-* **Why it's in progress**: We need to record exactly what changed (for example: "Status changed from OPEN to CLOSED"). Doing this for every single click without slowing down the website takes careful coding.
-
-### 4. Automated Testing
+### 2. Automated Testing
 * **Status**: Manual testing is finished. Automated "Robot" tests are being written.
 * **Why it's in progress**: We are writing scripts that act like users to make sure that a user from "Company A" can never, under any circumstances, see data from "Company B."
 * **Needs**: `Jest` and `Playwright` for testing.
