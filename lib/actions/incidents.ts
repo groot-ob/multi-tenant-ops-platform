@@ -4,6 +4,7 @@ import { getTenantPrisma } from "@/lib/prisma";
 import { PrismaClient, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redis } from "@/lib/redis";
+import { simulateNotification } from "./notification";
 
 const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
   [Status.OPEN]: [Status.MITIGATED, Status.RESOLVED],
@@ -118,6 +119,12 @@ export async function updateIncidentStatus(
 
     return updated;
   });
+
+  simulateNotification({
+    incidentId,
+    newStatus,
+    tenantId
+  }).catch(err => console.error("Notification simulation failed", err));
 
   revalidatePath(`/t/[tenantSlug]/dashboard`, "layout");
 

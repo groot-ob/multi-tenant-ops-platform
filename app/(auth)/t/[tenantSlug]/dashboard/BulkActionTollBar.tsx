@@ -5,6 +5,7 @@ import { bulkUpdateIncidents } from "@/lib/actions/incidents";
 import { getTenantUsers } from "@/lib/actions/users";
 import { useState, useEffect } from "react";
 import { Status } from "@prisma/client";
+import { useNotificationStore } from "@/lib/hooks/use-notifications";
 
 
 export default function BulkActionToolbar({ selectedIds, tenantId, userId, onSuccess }: any) {
@@ -12,6 +13,7 @@ export default function BulkActionToolbar({ selectedIds, tenantId, userId, onSuc
   const [showAssignMenu, setShowAssignMenu] = useState(false);
   const [users, setUsers] = useState<{id: string, name: string | null}[]>([]);
   const [alertMessage, setAlertMessage] = useState<{ text: string, type: 'success' | 'warning' } | null>(null);
+  const increment = useNotificationStore((state) => state.increment);
 
   useEffect(() => {
     if (alertMessage) {
@@ -27,6 +29,7 @@ export default function BulkActionToolbar({ selectedIds, tenantId, userId, onSuc
   }, [selectedIds.length, tenantId]);
 
   if (selectedIds.length === 0) return null;
+  
 
   const handleAction = async (status?: string, assigneeId?: string) => {
   setIsUpdating(true);
@@ -38,6 +41,11 @@ export default function BulkActionToolbar({ selectedIds, tenantId, userId, onSuc
       tenantId, 
       userId 
     });
+
+      if (result.count > 0) {
+        // Increment the badge by the number of successfully updated incidents
+        increment(result.count);
+      }
 
     if (result.count === 0 && status) {
       // ALERT: Nothing happened because the statuses were already resolved
