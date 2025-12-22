@@ -20,7 +20,7 @@ The entire stack is containerized. You do not need to install PostgreSQL or Redi
 
 3.  **Launch the Platform:**
     ```bash
-    docker-compose up --build
+    docker-compose up -d
     ```
     **This command automatically:**
     * Installs all dependencies (including `ioredis`).
