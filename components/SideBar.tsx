@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, AlertCircle, Settings, Users, 
   LogOut, Zap, ChevronRight, 
-  ScrollText
+  ScrollText,
+  Home
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -14,7 +15,7 @@ interface SidebarProps {
     name?: string | null;
     email?: string | null;
     image?: string | null;
-  } | null; // Allow null to prevent crashes
+  } | null; 
   currentTenant: {
     name: string;
     role: string;
@@ -31,13 +32,13 @@ export default function Sidebar({ user, currentTenant, tenantSlug }: SidebarProp
 
   const navItems = [
 
+    { name: 'Home', href: `/t/${tenantSlug}/dashboard`, icon: Home },
     { name: 'Settings', href: `/t/${tenantSlug}/settings/flags`, icon: Settings },
     { name: "Logs", href: `/t/${tenantSlug}/settings/logs`, icon: ScrollText }
   ];
 
   return (
     <aside className="w-64 border-r border-slate-200 bg-white flex flex-col fixed inset-y-0 z-40 shadow-sm">
-      {/* 1. PROFILE SECTION */}
       <div className="p-6 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0">
@@ -102,7 +103,7 @@ export default function Sidebar({ user, currentTenant, tenantSlug }: SidebarProp
         })}
       </nav>
 
-      {/* 3. ORGANIZATION FOOTER */}
+      {/* . ORGANIZATION FOOTER */}
       <div className="p-4 border-t border-slate-100">
         <div className="flex items-center gap-3 px-2 py-1">
           <div className="w-6 h-6 rounded-md bg-slate-900 flex items-center justify-center text-white">

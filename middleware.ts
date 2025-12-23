@@ -21,7 +21,12 @@ function isRateLimited(ip: string, limit: number, windowMs: number) {
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
-    const ip = req.ip ?? "127.0.0.1";
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(',')[0] : "127.0.0.1";
+
+    if (isRateLimited(ip, 100, 60000)) {
+      return new NextResponse("Too Many Requests", { status: 429 });
+    }
     
     // Allow these paths to always pass through
     if (
