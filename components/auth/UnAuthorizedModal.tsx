@@ -44,7 +44,7 @@ export function UnauthorizedModal() {
           <button
             onClick={() => {
               setIsOpen(false);
-              router.replace(window.location.pathname); // Clear the error param
+              router.replace(window.location.pathname); 
             }}
             className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98]"
           >

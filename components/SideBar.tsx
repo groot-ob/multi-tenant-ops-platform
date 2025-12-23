@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
-  LayoutDashboard, AlertCircle, Settings, Users, 
-  LogOut, Zap, ChevronRight, 
+    Settings, 
+    LogOut, Zap, ChevronRight, 
   ScrollText,
   Home
 } from "lucide-react";

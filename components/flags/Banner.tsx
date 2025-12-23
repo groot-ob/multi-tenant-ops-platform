@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, X, ShieldCheck, Info } from "lucide-react";
+import { X } from "lucide-react";
 
 interface BannerProps {
   enabled: boolean;
