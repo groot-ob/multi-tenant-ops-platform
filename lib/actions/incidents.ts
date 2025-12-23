@@ -1,18 +1,12 @@
 "use server";
 
 import { getTenantPrisma } from "@/lib/prisma";
-import { PrismaClient, Status } from "@prisma/client";
+import {  Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redis } from "@/lib/redis";
 import { simulateNotification } from "./notification";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/auth";
-
-const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
-  [Status.OPEN]: [Status.MITIGATED, Status.RESOLVED],
-  [Status.MITIGATED]: [Status.RESOLVED],
-  [Status.RESOLVED]: [], 
-};
 
 export async function createIncident(formData: any, tenantId: string, userId: string) {
   const db = getTenantPrisma(tenantId);
@@ -152,15 +146,23 @@ export async function bulkUpdateIncidents({
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
 
-  // Define the transition logic
   const allowedSourceStatuses: Record<Status, Status[]> = {
     [Status.MITIGATED]: [Status.OPEN],
     [Status.RESOLVED]: [Status.OPEN, Status.MITIGATED],
     [Status.OPEN]: [], 
   };
 
-  // We wrap the transaction result in a variable to return it later
   const result = await db.$transaction(async (tx) => {
+
+    const initialIncidentStates = await tx.incident.findMany({
+      where: { 
+        id: { in: ids }, 
+        tenantId,
+        ...(status && { status: { in: allowedSourceStatuses[status] } })
+      },
+      select: { id: true, status: true, assigneeId: true }
+    });
+
     const updateResult = await tx.incident.updateMany({
       where: { 
         id: { in: ids }, 
@@ -184,6 +186,17 @@ export async function bulkUpdateIncidents({
       await tx.timelineEvent.createMany({ data: events });
     }
 
+    const auditLogs = initialIncidentStates.map(incident => ({
+        actorId: userId,
+        tenantId,
+        action: "BULK_UPDATE",
+        entity: "Incident",
+        entityId: incident.id,
+        before: { status: incident.status, assigneeId: incident.assigneeId },
+        after: { status: status ?? incident.status, assigneeId: assigneeId ?? incident.assigneeId },
+      }));
+      await tx.auditLog.createMany({ data: auditLogs });
+  
     return { count: updateResult.count }; // Return count from transaction
   });
 
