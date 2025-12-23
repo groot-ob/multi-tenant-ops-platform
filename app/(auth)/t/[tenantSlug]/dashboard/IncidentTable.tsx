@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { User, Layers, Clock, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useNotificationStore } from "@/lib/hooks/use-notifications";
 
 interface Incident {
   id: string;

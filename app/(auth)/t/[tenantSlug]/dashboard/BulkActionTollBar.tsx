@@ -43,12 +43,11 @@ export default function BulkActionToolbar({ selectedIds, tenantId, userId, onSuc
     });
 
       if (result.count > 0) {
-        // Increment the badge by the number of successfully updated incidents
+      
         increment(result.count);
       }
 
     if (result.count === 0 && status) {
-      // ALERT: Nothing happened because the statuses were already resolved
       alert(`Invalid Move: These incidents are already ${status} or cannot be moved to ${status}.`);
     } else if (result.count < selectedIds.length && status) {
       // PARTIAL SUCCESS: Some were updated, some skipped

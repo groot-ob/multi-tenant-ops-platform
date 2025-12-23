@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Paperclip, Loader2, Plus, ShieldCheck, ShieldAlert, Check } from "lucide-react";
+import { Loader2, Plus, ShieldAlert, Check } from "lucide-react";
 
 type UploadStatus = "idle" | "uploading" | "scanning" | "success" | "error";
 
